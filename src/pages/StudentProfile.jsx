@@ -2,12 +2,14 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiArrowLeft, FiEdit2, FiTrash2, FiMail, FiPhone, FiBook, FiCalendar, FiAward, FiUser } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useStudents } from '../context/StudentContext';
 import AvatarBadge from '../components/AvatarBadge';
 import StudentIDCard from '../components/StudentIDCard';
 import PhotoUpload from '../components/PhotoUpload';
+import MessagingBox from '../components/MessagingBox';
+import { getTrackRecord } from '../services/portalApi';
 import './StudentProfile.css';
 
 export default function StudentProfile() {
@@ -15,8 +17,15 @@ export default function StudentProfile() {
   const { getStudent, deleteStudent, updateStudent } = useStudents();
   const navigate = useNavigate();
   const [showDelete, setShowDelete] = useState(false);
+  const [trackRecords, setTrackRecords] = useState(null);
 
   const student = getStudent(id);
+
+  useEffect(() => {
+    if (student) {
+      getTrackRecord(student.id).then(data => setTrackRecords(data || {}));
+    }
+  }, [student]);
 
   if (!student) {
     return (
@@ -206,7 +215,54 @@ export default function StudentProfile() {
             </div>
           </motion.div>
         )}
+
+        {/* Student Progress / Track Records */}
+        {trackRecords && (
+          <motion.div
+            className="track-records-section glass-card"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            style={{ padding: 28, marginTop: 24 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <FiAward style={{ color: '#00f5ff', fontSize: 24 }} />
+              <h3 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 20, fontWeight: 700 }}>Student Progress & Achievements</h3>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <div>
+                <h4 style={{ color: '#b44fff', marginBottom: 12 }}>Certifications</h4>
+                {(trackRecords.certifications || []).length > 0 ? (
+                  <ul style={{ paddingLeft: 20, color: '#fff' }}>
+                    {trackRecords.certifications.map((c, idx) => (
+                      <li key={idx} style={{ marginBottom: 8 }}>
+                        <strong>{c.name}</strong> ({c.issuer}) - {c.date}
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p style={{ color: '#9090b0' }}>No certifications recorded.</p>}
+              </div>
+
+              <div>
+                <h4 style={{ color: '#ffe600', marginBottom: 12 }}>Projects</h4>
+                {(trackRecords.projects || []).length > 0 ? (
+                  <ul style={{ paddingLeft: 20, color: '#fff' }}>
+                    {trackRecords.projects.map((p, idx) => (
+                      <li key={idx} style={{ marginBottom: 8 }}>
+                        <strong>{p.title}</strong> ({p.tech}) - Grade: <span style={{ color: '#39ff14' }}>{p.grade}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p style={{ color: '#9090b0' }}>No projects recorded.</p>}
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
+
+      {/* Admin Messaging Box */}
+      {student && <MessagingBox studentId={student.id} currentUserRole="admin" currentUserName="Administrator" />}
 
       {/* Delete modal */}
       <AnimatePresence>

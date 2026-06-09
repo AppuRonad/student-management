@@ -16,6 +16,8 @@ import AvatarBadge from '../components/AvatarBadge';
 import AIChatbot from '../components/AIChatbot';
 import AnnouncementBoard from '../components/AnnouncementBoard';
 import StudentIDCard from '../components/StudentIDCard';
+import MessagingBox from '../components/MessagingBox';
+import { toast } from 'react-toastify';
 import { useScrollReveal, useCounter } from '../hooks/useScrollReveal';
 import './StudentPortal.css';
 
@@ -71,7 +73,7 @@ function PortalStatCard({ icon: Icon, label, value, color, suffix = '', delay = 
 }
 
 // ── Overview Tab ───────────────────────────────────────────────────────────────
-function OverviewTab({ student, records, comps = [] }) {
+function OverviewTab({ student, records, comps = [], onAddCertification }) {
   const semData = records?.semesters || [];
   const latest = semData[semData.length - 1];
 
@@ -177,9 +179,17 @@ function OverviewTab({ student, records, comps = [] }) {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
         >
-          <div className="occ-header">
-            <FiCheckCircle style={{ color: '#39ff14' }} />
-            <h3>Certifications</h3>
+          <div className="occ-header" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <FiCheckCircle style={{ color: '#39ff14' }} />
+              <h3>Certifications</h3>
+            </div>
+            <button 
+              onClick={onAddCertification}
+              style={{ background: 'transparent', border: '1px solid #39ff14', color: '#39ff14', padding: '4px 12px', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              + Add
+            </button>
           </div>
           <div className="cert-list">
             {(records?.certifications || []).map((c, i) => (
@@ -598,6 +608,32 @@ export default function StudentPortal() {
     </div>
   );
 
+  const handleAddCertification = async () => {
+    const certName = prompt("Enter Certification Name:");
+    if (!certName) return;
+    const issuer = prompt("Enter Issuer (e.g., Coursera, Udemy):") || "Unknown";
+    const newCert = {
+      name: certName,
+      issuer: issuer,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      badge: "🏅"
+    };
+
+    const updatedRecords = { ...records };
+    if (!updatedRecords.certifications) updatedRecords.certifications = [];
+    updatedRecords.certifications.push(newCert);
+
+    try {
+      // Need to import saveTrackRecord
+      const { saveTrackRecord } = await import('../services/portalApi.js');
+      await saveTrackRecord(portalStudent.id, updatedRecords);
+      setRecords(updatedRecords);
+      toast.success("Certification added successfully!");
+    } catch (err) {
+      toast.error("Failed to save certification.");
+    }
+  };
+
   return (
     <div className="portal-page">
       <div className="orbs">
@@ -651,7 +687,7 @@ export default function StudentPortal() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
           >
-            {activeTab === 'overview'     && <OverviewTab     student={portalStudent} records={records} comps={comps} />}
+            {activeTab === 'overview'     && <OverviewTab     student={portalStudent} records={records} comps={comps} onAddCertification={handleAddCertification} />}
             {activeTab === 'track'        && <TrackRecordsTab records={records} />}
             {activeTab === 'competitions' && <CompetitionsTab studentId={portalStudent.id} comps={comps} />}
             {activeTab === 'achievements'  && <AchievementsTab studentId={portalStudent.id} records={records} comps={comps} />}
@@ -667,6 +703,8 @@ export default function StudentPortal() {
       <AIChatbot
         studentContext={`Student: ${portalStudent.fullName}, Course: ${portalStudent.course}, Department: ${portalStudent.department}, GPA: ${portalStudent.gpa}`}
       />
+
+      <MessagingBox studentId={portalStudent.id} currentUserRole="student" currentUserName={portalStudent.fullName} />
     </div>
   );
 }

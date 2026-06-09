@@ -55,3 +55,27 @@ export async function fsSeedStudents(students) {
     await setDoc(doc(db, COLLECTION, s.id), { ...s, createdAt: serverTimestamp() });
   }
 }
+
+// ── Messaging ─────────────────────────────────────────────────────────────
+export async function fsSendMessage(studentId, senderId, text) {
+  if (!isFirebaseConfigured) return null;
+  const data = {
+    senderId,
+    text,
+    timestamp: serverTimestamp()
+  };
+  const ref = await addDoc(collection(db, `chats/admin_${studentId}/messages`), data);
+  return { ...data, id: ref.id };
+}
+
+export function fsListenMessages(studentId, callback) {
+  if (!isFirebaseConfigured) return () => {};
+  const q = query(
+    collection(db, `chats/admin_${studentId}/messages`),
+    orderBy('timestamp', 'asc')
+  );
+  return onSnapshot(q, (snap) => {
+    const msgs = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    callback(msgs);
+  });
+}
