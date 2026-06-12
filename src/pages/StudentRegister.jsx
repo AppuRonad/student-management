@@ -4,10 +4,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiUser, FiMail, FiPhone, FiBook, FiCalendar,
   FiLock, FiEye, FiEyeOff, FiCheck, FiArrowRight,
-  FiZap, FiArrowLeft, FiCheckCircle,
+  FiZap, FiArrowLeft, FiCheckCircle, FiSun, FiMoon,
 } from 'react-icons/fi';
 import { useStudents, COURSES, DEPARTMENTS } from '../context/StudentContext';
 import { registerStudent } from '../services/portalApi';
+import { useTheme } from '../context/ThemeContext';
 import AvatarBadge from '../components/AvatarBadge';
 import './StudentRegister.css';
 
@@ -73,6 +74,7 @@ const STEPS = [
 export default function StudentRegister() {
   const { addStudent } = useStudents();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const [step,    setStep]    = useState(1);
   const [done,    setDone]    = useState(false);
@@ -246,6 +248,22 @@ export default function StudentRegister() {
             </motion.div>
             <span>SMS <span style={{ color: 'var(--neon-cyan)' }}>Pro</span></span>
           </Link>
+
+          {/* Theme toggle */}
+          <motion.button
+            className="page-theme-btn"
+            onClick={toggleTheme}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            style={{ alignSelf: 'flex-start', marginTop: -8 }}
+          >
+            <AnimatePresence mode="wait">
+              {theme === 'dark'
+                ? <motion.span key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><FiSun /></motion.span>
+                : <motion.span key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}><FiMoon /></motion.span>}
+            </AnimatePresence>
+            {theme === 'dark' ? 'Light' : 'Dark'}
+          </motion.button>
 
           <div className="reg-hero-text">
             <h1>

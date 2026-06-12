@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiArrowLeft, FiEdit2, FiTrash2, FiMail, FiPhone, FiBook, FiCalendar, FiAward, FiUser } from 'react-icons/fi';
+import { FiArrowLeft, FiEdit2, FiTrash2, FiMail, FiPhone, FiBook, FiCalendar, FiAward, FiUser, FiSave, FiFileText, FiBriefcase } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
@@ -9,7 +9,7 @@ import AvatarBadge from '../components/AvatarBadge';
 import StudentIDCard from '../components/StudentIDCard';
 import PhotoUpload from '../components/PhotoUpload';
 import MessagingBox from '../components/MessagingBox';
-import { getTrackRecord } from '../services/portalApi';
+import { getTrackRecord, saveAdminMarks } from '../services/portalApi';
 import './StudentProfile.css';
 
 export default function StudentProfile() {
@@ -18,14 +18,58 @@ export default function StudentProfile() {
   const navigate = useNavigate();
   const [showDelete, setShowDelete] = useState(false);
   const [trackRecords, setTrackRecords] = useState(null);
+  const [adminMarksForm, setAdminMarksForm] = useState({
+    overallGrade: '', overallStatus: 'PASS',
+    internalMarks: '', externalMarks: '', remarks: '',
+  });
+  const [semMarks, setSemMarks] = useState([]);
+  const [savingMarks, setSavingMarks] = useState(false);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   const student = getStudent(id);
 
   useEffect(() => {
     if (student) {
-      getTrackRecord(student.id).then(data => setTrackRecords(data || {}));
+      getTrackRecord(student.id).then(data => {
+        setTrackRecords(data || {});
+        if (data?.adminMarks) {
+          setAdminMarksForm({
+            overallGrade: data.adminMarks.overallGrade || '',
+            overallStatus: data.adminMarks.overallStatus || 'PASS',
+            internalMarks: data.adminMarks.internalMarks ?? '',
+            externalMarks: data.adminMarks.externalMarks ?? '',
+            remarks: data.adminMarks.remarks || '',
+          });
+          setSemMarks(data.adminMarks.semesterMarks || []);
+        }
+        if (data?.semesters?.length && !data.adminMarks?.semesterMarks?.length) {
+          setSemMarks(data.semesters.map(s => ({
+            sem: s.sem, marks: '', grade: '', status: 'PASS', attendance: s.attendance || ''
+          })));
+        }
+      });
     }
   }, [student]);
+
+  const handleSaveAdminMarks = async () => {
+    setSavingMarks(true);
+    try {
+      await saveAdminMarks(student.id, {
+        ...adminMarksForm,
+        internalMarks: adminMarksForm.internalMarks !== '' ? parseFloat(adminMarksForm.internalMarks) : null,
+        externalMarks: adminMarksForm.externalMarks !== '' ? parseFloat(adminMarksForm.externalMarks) : null,
+        semesterMarks: semMarks.map(sm => ({
+          ...sm,
+          marks: sm.marks !== '' ? parseInt(sm.marks) : null,
+          attendance: sm.attendance !== '' ? parseInt(sm.attendance) : null,
+        })),
+      });
+      toast.success('Admin marks saved to MongoDB!');
+    } catch {
+      toast.error('Failed to save admin marks.');
+    }
+    setSavingMarks(false);
+  };
 
   if (!student) {
     return (
@@ -225,11 +269,113 @@ export default function StudentProfile() {
             transition={{ delay: 0.5 }}
             style={{ padding: 28, marginTop: 24 }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-              <FiAward style={{ color: '#00f5ff', fontSize: 24 }} />
-              <h3 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 20, fontWeight: 700 }}>Student Progress & Achievements</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <FiAward style={{ color: '#00f5ff', fontSize: 24 }} />
+                <h3 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 20, fontWeight: 700 }}>Student Progress & Achievements</h3>
+              </div>
+              <button
+                onClick={() => setShowAdminPanel(!showAdminPanel)}
+                style={{ padding: '7px 16px', background: showAdminPanel ? 'rgba(180,79,255,0.2)' : 'rgba(180,79,255,0.08)', border: '1px solid rgba(180,79,255,0.3)', borderRadius: 50, color: 'var(--neon-purple)', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <FiFileText /> {showAdminPanel ? 'Hide' : 'Admin Marks Panel'}
+              </button>
             </div>
-            
+
+            {/* ADMIN MARKS PANEL */}
+            <AnimatePresence>
+              {showAdminPanel && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                  style={{ overflow: 'hidden', marginBottom: 24 }}
+                >
+                  <div style={{ padding: '20px 24px', background: 'rgba(180,79,255,0.05)', border: '1px solid rgba(180,79,255,0.2)', borderRadius: 16, marginBottom: 16 }}>
+                    <h4 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 16, fontWeight: 700, color: '#b44fff', marginBottom: 16 }}>🎓 Overall Assessment</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+                      {[{ label: 'Overall Grade', key: 'overallGrade', type: 'select', opts: ['', 'A+', 'A', 'B+', 'B', 'C', 'F'] },
+                        { label: 'Status', key: 'overallStatus', type: 'select', opts: ['PASS', 'FAIL'] },
+                        { label: 'Internal Marks', key: 'internalMarks', type: 'number' },
+                        { label: 'External Marks', key: 'externalMarks', type: 'number' },
+                      ].map(({ label, key, type, opts }) => (
+                        <div key={key}>
+                          <label style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>{label}</label>
+                          {type === 'select' ? (
+                            <select style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 13, fontFamily: 'Inter' }}
+                              value={adminMarksForm[key]} onChange={e => setAdminMarksForm(f => ({ ...f, [key]: e.target.value }))}
+                            >
+                              {opts.map(o => <option key={o} value={o}>{o || '— Select —'}</option>)}
+                            </select>
+                          ) : (
+                            <input type={type} style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 13, fontFamily: 'Inter' }}
+                              placeholder="e.g. 75" value={adminMarksForm[key]}
+                              onChange={e => setAdminMarksForm(f => ({ ...f, [key]: e.target.value }))}
+                            />
+                          )}
+                        </div>
+                      ))}
+                      <div style={{ gridColumn: 'span 3' }}>
+                        <label style={{ fontSize: 11, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>Remarks</label>
+                        <input style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 8, color: 'var(--text-primary)', fontSize: 13, fontFamily: 'Inter' }}
+                          placeholder="e.g. Excellent performance" value={adminMarksForm.remarks}
+                          onChange={e => setAdminMarksForm(f => ({ ...f, remarks: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Per-semester marks */}
+                    {semMarks.length > 0 && (
+                      <>
+                        <h4 style={{ fontFamily: "'Rajdhani',sans-serif", fontSize: 15, fontWeight: 700, color: '#00f5ff', marginBottom: 12 }}>📚 Semester-wise Marks</h4>
+                        <div style={{ overflowX: 'auto' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                            <thead>
+                              <tr>{['Semester', 'Marks /100', 'Grade', 'Status', 'Attendance %'].map(h => (
+                                <th key={h} style={{ padding: '8px 12px', textAlign: 'left', color: 'var(--text-secondary)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>{h}</th>
+                              ))}</tr>
+                            </thead>
+                            <tbody>
+                              {semMarks.map((sm, i) => (
+                                <tr key={i}>
+                                  <td style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: 'var(--text-primary)', fontWeight: 600 }}>{sm.sem}</td>
+                                  {[{ key: 'marks', type: 'number', ph: '0-100' },
+                                    { key: 'grade', type: 'select', opts: ['', 'A+', 'A', 'B+', 'B', 'C', 'F'] },
+                                    { key: 'status', type: 'select', opts: ['PASS', 'FAIL'] },
+                                    { key: 'attendance', type: 'number', ph: '0-100' },
+                                  ].map(({ key, type, opts, ph }) => (
+                                    <td key={key} style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                      {type === 'select' ? (
+                                        <select style={{ padding: '5px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 6, color: key === 'status' ? (sm.status === 'PASS' ? '#39ff14' : '#ff2d78') : 'var(--text-primary)', fontSize: 12, fontFamily: 'Inter' }}
+                                          value={sm[key]} onChange={e => setSemMarks(prev => prev.map((x, j) => j === i ? { ...x, [key]: e.target.value } : x))}
+                                        >
+                                          {opts.map(o => <option key={o} value={o}>{o || '—'}</option>)}
+                                        </select>
+                                      ) : (
+                                        <input type="number" placeholder={ph} style={{ width: 70, padding: '5px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 6, color: 'var(--text-primary)', fontSize: 12, fontFamily: 'Inter' }}
+                                          value={sm[key] ?? ''} onChange={e => setSemMarks(prev => prev.map((x, j) => j === i ? { ...x, [key]: e.target.value } : x))}
+                                        />
+                                      )}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </>
+                    )}
+
+                    <button
+                      onClick={handleSaveAdminMarks}
+                      disabled={savingMarks}
+                      style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 24px', background: 'linear-gradient(135deg, #b44fff, #00f5ff)', border: 'none', borderRadius: 50, color: 'white', fontWeight: 700, fontSize: 14, cursor: 'pointer', opacity: savingMarks ? 0.7 : 1 }}
+                    >
+                      <FiSave /> {savingMarks ? 'Saving...' : 'Save Admin Marks'}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
               <div>
                 <h4 style={{ color: '#b44fff', marginBottom: 12 }}>Certifications</h4>
@@ -237,7 +383,7 @@ export default function StudentProfile() {
                   <ul style={{ paddingLeft: 20, color: '#fff' }}>
                     {trackRecords.certifications.map((c, idx) => (
                       <li key={idx} style={{ marginBottom: 8 }}>
-                        <strong>{c.name}</strong> ({c.issuer}) - {c.date}
+                        <strong>{c.name}</strong> ({c.issuer}) — {c.date}
                       </li>
                     ))}
                   </ul>
@@ -250,11 +396,38 @@ export default function StudentProfile() {
                   <ul style={{ paddingLeft: 20, color: '#fff' }}>
                     {trackRecords.projects.map((p, idx) => (
                       <li key={idx} style={{ marginBottom: 8 }}>
-                        <strong>{p.title}</strong> ({p.tech}) - Grade: <span style={{ color: '#39ff14' }}>{p.grade}</span>
+                        <strong>{p.title}</strong> {p.tech && `(${p.tech})`} {p.grade && <span style={{ color: '#39ff14' }}>— {p.grade}</span>}
                       </li>
                     ))}
                   </ul>
                 ) : <p style={{ color: '#9090b0' }}>No projects recorded.</p>}
+              </div>
+
+              <div>
+                <h4 style={{ color: '#ff2d78', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}><FiBriefcase /> Internships</h4>
+                {(trackRecords.internships || []).length > 0 ? (
+                  <ul style={{ paddingLeft: 20, color: '#fff' }}>
+                    {trackRecords.internships.map((intern, idx) => (
+                      <li key={idx} style={{ marginBottom: 8 }}>
+                        <strong>{intern.role}</strong> @ {intern.company} — <span style={{ color: '#b44fff' }}>{intern.durationMonths} months</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p style={{ color: '#9090b0' }}>No internships recorded.</p>}
+              </div>
+
+              <div>
+                <h4 style={{ color: '#00f5ff', marginBottom: 12 }}>Exam Results</h4>
+                {(trackRecords.examResults || []).length > 0 ? (
+                  <ul style={{ paddingLeft: 20, color: '#fff' }}>
+                    {trackRecords.examResults.slice(0, 4).map((e, idx) => (
+                      <li key={idx} style={{ marginBottom: 8 }}>
+                        <strong>{e.subject}</strong> ({e.semester}) — {e.marksObtained}/{e.maxMarks} <span style={{ color: e.status === 'PASS' ? '#39ff14' : '#ff2d78' }}>{e.status}</span>
+                      </li>
+                    ))}
+                    {trackRecords.examResults.length > 4 && <li style={{ color: '#9090b0' }}>+{trackRecords.examResults.length - 4} more...</li>}
+                  </ul>
+                ) : <p style={{ color: '#9090b0' }}>No exam results recorded.</p>}
               </div>
             </div>
           </motion.div>

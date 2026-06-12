@@ -62,10 +62,34 @@ export async function fsSendMessage(studentId, senderId, text) {
   const data = {
     senderId,
     text,
-    timestamp: serverTimestamp()
+    timestamp: serverTimestamp(),
+    edited: false,
+    unsent: false,
   };
   const ref = await addDoc(collection(db, `chats/admin_${studentId}/messages`), data);
   return { ...data, id: ref.id };
+}
+
+export async function fsEditMessage(studentId, messageId, newText) {
+  if (!isFirebaseConfigured) return null;
+  await updateDoc(
+    doc(db, `chats/admin_${studentId}/messages`, messageId),
+    { text: newText, edited: true, editedAt: serverTimestamp() }
+  );
+}
+
+export async function fsDeleteMessage(studentId, messageId) {
+  if (!isFirebaseConfigured) return null;
+  await deleteDoc(doc(db, `chats/admin_${studentId}/messages`, messageId));
+}
+
+export async function fsUnsendMessage(studentId, messageId) {
+  if (!isFirebaseConfigured) return null;
+  // Unsend = replace text with a tombstone marker, keep bubble visible
+  await updateDoc(
+    doc(db, `chats/admin_${studentId}/messages`, messageId),
+    { text: '', unsent: true, editedAt: serverTimestamp() }
+  );
 }
 
 export function fsListenMessages(studentId, callback) {

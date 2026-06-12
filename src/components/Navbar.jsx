@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiHome, FiUsers, FiUserPlus, FiBarChart2, FiMenu, FiX, FiZap, FiLogIn, FiDatabase, FiEdit } from 'react-icons/fi';
+import { FiHome, FiUsers, FiUserPlus, FiBarChart2, FiMenu, FiX, FiZap, FiLogIn, FiDatabase, FiEdit, FiSun, FiMoon } from 'react-icons/fi';
 import { useStudents } from '../context/StudentContext';
+import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 const links = [
@@ -17,6 +18,7 @@ export default function Navbar() {
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const location   = useLocation();
   const { backendUp, loading } = useStudents();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -52,7 +54,6 @@ export default function Navbar() {
           <NavLink key={to} to={to} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <Icon className="nav-icon" />
             <span>{label}</span>
-            <motion.div className="nav-underline" layoutId="nav-underline" />
           </NavLink>
         ))}
       </div>
@@ -65,6 +66,42 @@ export default function Navbar() {
         </span>
         <div className="db-dot" />
       </div>
+
+      {/* Theme toggle */}
+      <motion.button
+        className="theme-toggle"
+        onClick={toggleTheme}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.92 }}
+        title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+      >
+        <AnimatePresence mode="wait">
+          {theme === 'dark' ? (
+            <motion.span
+              key="sun"
+              initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.2 }}
+              className="theme-icon"
+            >
+              <FiSun />
+            </motion.span>
+          ) : (
+            <motion.span
+              key="moon"
+              initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              transition={{ duration: 0.2 }}
+              className="theme-icon"
+            >
+              <FiMoon />
+            </motion.span>
+          )}
+        </AnimatePresence>
+        <span className="theme-label">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+      </motion.button>
 
       <NavLink to="/student-register" className="student-register-btn">
         <FiEdit /> Register
@@ -93,6 +130,10 @@ export default function Navbar() {
                 <span>{label}</span>
               </NavLink>
             ))}
+            <button className="mobile-theme-toggle" onClick={toggleTheme}>
+              {theme === 'dark' ? <FiSun /> : <FiMoon />}
+              <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

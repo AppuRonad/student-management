@@ -420,6 +420,34 @@
   90%  { transform: translateX(3px); }
 }
 
+/* Page theme toggle button (Login / Register pages) */
+.page-theme-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  background: rgba(180,79,255,0.08);
+  border: 1px solid rgba(180,79,255,0.25);
+  border-radius: 50px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Rajdhani', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+.page-theme-btn:hover {
+  background: rgba(180,79,255,0.15);
+  color: var(--neon-purple);
+  border-color: rgba(180,79,255,0.4);
+  box-shadow: 0 0 12px rgba(180,79,255,0.15);
+}
+[data-theme="light"] .page-theme-btn {
+  background: rgba(139,45,255,0.06);
+  border-color: rgba(139,45,255,0.2);
+}
+
 @media (max-width: 900px) {
   .login-layout { flex-direction: column; }
   .login-left { padding: 60px 32px 32px; }

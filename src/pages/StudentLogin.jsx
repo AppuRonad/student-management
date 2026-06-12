@@ -3,10 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiUser, FiLock, FiEye, FiEyeOff,
-  FiArrowRight, FiZap, FiUserPlus,
+  FiArrowRight, FiZap, FiUserPlus, FiSun, FiMoon,
 } from 'react-icons/fi';
 import { usePortalAuth } from '../context/PortalAuthContext';
 import { loginStudent as apiLogin } from '../services/portalApi';
+import { useTheme } from '../context/ThemeContext';
 import './StudentLogin.css';
 
 export default function StudentLogin() {
@@ -20,6 +21,7 @@ export default function StudentLogin() {
   const { loginStudent } = usePortalAuth();
   const navigate         = useNavigate();
   const cardRef          = useRef(null);
+  const { theme, toggleTheme } = useTheme();
 
   // Mouse spotlight effect on the card
   const handleCardMove = (e) => {
@@ -109,6 +111,23 @@ export default function StudentLogin() {
             </motion.div>
             <span>SMS <span style={{ color: 'var(--neon-cyan)' }}>Pro</span></span>
           </Link>
+
+          {/* Theme toggle */}
+          <motion.button
+            className="page-theme-btn"
+            onClick={toggleTheme}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            style={{ alignSelf: 'flex-start', marginTop: -8 }}
+          >
+            <AnimatePresence mode="wait">
+              {theme === 'dark'
+                ? <motion.span key="sun" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}><FiSun /></motion.span>
+                : <motion.span key="moon" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}><FiMoon /></motion.span>}
+            </AnimatePresence>
+            {theme === 'dark' ? 'Light' : 'Dark'}
+          </motion.button>
 
           <div className="login-hero-text">
             <motion.h1

@@ -60,7 +60,7 @@ export default function AIChatbot({ studentContext = '' }) {
     setMessages(prev => [...prev, userMsg]);
     setLoading(true);
 
-    if (!API_KEY || API_KEY === 'your_gemini_api_key_here') {
+    if (!API_KEY) {
       await new Promise(r => setTimeout(r, 800));
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -73,15 +73,40 @@ export default function AIChatbot({ studentContext = '' }) {
 
     try {
       const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-3.5-flash' });
+      const model = genAI.getGenerativeModel(
+        {
+          model: 'gemini-3.5-flash',
+          systemInstruction: SYSTEM_PROMPT,
+        },
+        { apiVersion: 'v1beta' }
+      );
 
-      const fullPrompt = `${SYSTEM_PROMPT}\n\nStudent context: ${studentContext || 'General student'}\n\nUser: ${text}`;
-      const result = await model.generateContent(fullPrompt);
+      const chat = model.startChat({
+        history: messages
+          .filter(m => m.role === 'user' || m.role === 'assistant')
+          .slice(1) // skip the intro message
+          .map(m => ({
+            role: m.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: m.text }],
+          })),
+      });
+
+      const result = await chat.sendMessage(
+        `Student context: ${studentContext || 'General student'}\n\n${text}`
+      );
       const response = result.response.text();
 
       setMessages(prev => [...prev, { role: 'assistant', text: response, time: new Date() }]);
     } catch (err) {
-      setError('Failed to get response. Check your API key.');
+      console.error('Gemini error:', err);
+      const msg = err?.message || '';
+      if (msg.includes('API_KEY_INVALID') || msg.includes('400')) {
+        setError('Invalid API key — check VITE_GEMINI_API_KEY in your .env');
+      } else if (msg.includes('quota') || msg.includes('429')) {
+        setError('Rate limit hit — wait a moment and try again.');
+      } else {
+        setError(`Error: ${msg || 'Unknown error. Check console.'}`);
+      }
     } finally {
       setLoading(false);
     }

@@ -1,11 +1,12 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LineChart, Line, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, Radar
 } from 'recharts';
-import { FiBarChart2, FiPieChart, FiTrendingUp } from 'react-icons/fi';
+import { FiBarChart2, FiPieChart, FiTrendingUp, FiBriefcase, FiZap } from 'react-icons/fi';
 import { useStudents, DEPARTMENTS, COURSES } from '../context/StudentContext';
+import { getAllTrackRecords } from '../services/portalApi';
 import './Analytics.css';
 
 const COLORS = ['#b44fff', '#00f5ff', '#ff2d78', '#ffe600', '#39ff14', '#ff6b35', '#a78bfa', '#f0abfc'];
@@ -45,6 +46,11 @@ function ChartCard({ title, icon: Icon, children, delay = 0, fullWidth = false }
 
 export default function Analytics() {
   const { students } = useStudents();
+  const [trackRecords, setTrackRecords] = useState([]);
+
+  useEffect(() => {
+    getAllTrackRecords().then(data => setTrackRecords(data || [])).catch(() => {});
+  }, []);
 
   const data = useMemo(() => {
     // Dept distribution
@@ -97,6 +103,43 @@ export default function Analytics() {
 
     return { deptData, courseData, gpaData, enrollData, radarData };
   }, [students]);
+
+  // Track-record based charts (from MongoDB)
+  const trackData = useMemo(() => {
+    // Per-student internship count
+    const internshipData = students.map(s => {
+      const rec = trackRecords.find(r => r.studentId === s.id);
+      return {
+        name: s.fullName.split(' ')[0],
+        internships: (rec?.internships || []).length,
+        months: (rec?.internships || []).reduce((a, i) => a + (i.durationMonths || 0), 0),
+      };
+    }).filter(s => s.internships > 0).sort((a, b) => b.months - a.months).slice(0, 10);
+
+    // Per-student project count
+    const projectData = students.map(s => {
+      const rec = trackRecords.find(r => r.studentId === s.id);
+      return {
+        name: s.fullName.split(' ')[0],
+        projects: (rec?.projects || []).length,
+      };
+    }).filter(s => s.projects > 0).sort((a, b) => b.projects - a.projects).slice(0, 10);
+
+    // Internship months distribution
+    const monthsBuckets = [{ name: '1-2 mo', count: 0 }, { name: '3-4 mo', count: 0 }, { name: '5-6 mo', count: 0 }, { name: '6+ mo', count: 0 }];
+    trackRecords.forEach(r => {
+      const months = (r.internships || []).reduce((a, i) => a + (i.durationMonths || 0), 0);
+      if (months >= 1 && months <= 2) monthsBuckets[0].count++;
+      else if (months <= 4) monthsBuckets[1].count++;
+      else if (months <= 6) monthsBuckets[2].count++;
+      else if (months > 6) monthsBuckets[3].count++;
+    });
+
+    const studentsWithInternships = trackRecords.filter(r => (r.internships || []).length > 0).length;
+    const studentsWithProjects = trackRecords.filter(r => (r.projects || []).length > 0).length;
+
+    return { internshipData, projectData, monthsBuckets, studentsWithInternships, studentsWithProjects };
+  }, [students, trackRecords]);
 
   const topStats = [
     { label: 'Total Students', value: students.length, color: '#b44fff' },
@@ -228,6 +271,54 @@ export default function Analytics() {
                 <Tooltip content={<CustomTooltip />} />
               </RadarChart>
             </ResponsiveContainer>
+          </ChartCard>
+
+          {/* Internship chart */}
+          <ChartCard title="Students vs Internship Experience (months)" icon={FiBriefcase} delay={0.6} fullWidth>
+            {trackData.internshipData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={trackData.internshipData} barSize={28}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="name" stroke="#9090b0" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#9090b0" tick={{ fontSize: 12 }} label={{ value: 'Months', angle: -90, position: 'insideLeft', fill: '#9090b0', fontSize: 11 }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="months" name="Internship Months" radius={[6, 6, 0, 0]}>
+                    {trackData.internshipData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 12, color: 'var(--text-secondary)' }}>
+                <span style={{ fontSize: 48 }}>💼</span>
+                <p>No internship data yet — students need to add internships in their portal.</p>
+              </div>
+            )}
+          </ChartCard>
+
+          {/* Projects chart */}
+          <ChartCard title="Students vs Number of Projects" icon={FiZap} delay={0.7} fullWidth>
+            {trackData.projectData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={trackData.projectData} barSize={28}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="name" stroke="#9090b0" tick={{ fontSize: 12 }} />
+                  <YAxis stroke="#9090b0" tick={{ fontSize: 12 }} allowDecimals={false} label={{ value: 'Projects', angle: -90, position: 'insideLeft', fill: '#9090b0', fontSize: 11 }} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="projects" name="Projects" radius={[6, 6, 0, 0]}>
+                    {trackData.projectData.map((_, i) => (
+                      <Cell key={i} fill={['#ffe600', '#39ff14', '#00f5ff', '#b44fff', '#ff2d78', '#ff6b35'][i % 6]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 200, gap: 12, color: 'var(--text-secondary)' }}>
+                <span style={{ fontSize: 48 }}>🚀</span>
+                <p>No project data yet — students need to add projects in their portal.</p>
+              </div>
+            )}
           </ChartCard>
         </div>
       </div>

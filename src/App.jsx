@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { StudentProvider } from './context/StudentContext';
 import { PortalAuthProvider } from './context/PortalAuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import ParticleBackground from './components/ParticleBackground';
+import BackgroundEffects from './components/BackgroundEffects';
 import Dashboard from './pages/Dashboard';
 import Students from './pages/Students';
 import StudentForm from './pages/StudentForm';
@@ -25,12 +27,15 @@ function AdminLayout({ children }) {
   );
 }
 
-export default function App() {
+function AppInner() {
+  const { theme } = useTheme();
   return (
     <ErrorBoundary>
       <StudentProvider>
         <PortalAuthProvider>
           <BrowserRouter>
+            {/* Always-present background layers on every route */}
+            <BackgroundEffects />
             <Routes>
               {/* ── Admin panel ── */}
               <Route path="/" element={<AdminLayout><Dashboard /></AdminLayout>} />
@@ -49,10 +54,14 @@ export default function App() {
             <ToastContainer
               position="bottom-right"
               autoClose={3000}
-              theme="dark"
-              toastStyle={{
+              theme={theme === 'light' ? 'light' : 'dark'}
+              toastStyle={theme === 'dark' ? {
                 background: 'rgba(10,10,30,0.95)',
                 border: '1px solid rgba(180,79,255,0.3)',
+                backdropFilter: 'blur(12px)',
+              } : {
+                background: 'rgba(255,255,255,0.97)',
+                border: '1px solid rgba(139,45,255,0.2)',
                 backdropFilter: 'blur(12px)',
               }}
             />
@@ -60,5 +69,13 @@ export default function App() {
         </PortalAuthProvider>
       </StudentProvider>
     </ErrorBoundary>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppInner />
+    </ThemeProvider>
   );
 }
