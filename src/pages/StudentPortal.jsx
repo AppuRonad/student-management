@@ -1260,7 +1260,7 @@ export default function StudentPortal() {
         </Modal>
       )}
 
-      <AIChatbot studentContext={`Student: ${portalStudent.fullName}, Course: ${portalStudent.course}, Department: ${portalStudent.department}, GPA: ${portalStudent.gpa}`} />
+      <AIChatbot studentContext={`Student: ${portalStudent.fullName}, Course: ${portalStudent.course}, Department: ${portalStudent.department}, GPA: ${portalStudent.gpa}`} studentId={portalStudent.id} />
       <MessagingBox studentId={portalStudent.id} currentUserRole="student" currentUserName={portalStudent.fullName} />
     </div>
   );
