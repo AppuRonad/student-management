@@ -1,8 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
 import { getDatabase } from 'firebase/database';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
@@ -14,17 +12,18 @@ const firebaseConfig = {
   databaseURL:       import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
-// Initialize Firebase only if config is present
-const isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== 'your_api_key_here';
+const isFirebaseConfigured =
+  !!firebaseConfig.apiKey &&
+  firebaseConfig.apiKey !== 'your_api_key_here' &&
+  !!firebaseConfig.databaseURL;
 
-let app, auth, db, storage, rtdb;
+let app, rtdb, storage, db;
 
 if (isFirebaseConfigured) {
   app     = initializeApp(firebaseConfig);
-  auth    = getAuth(app);
-  db      = getFirestore(app);       // Firestore — main database
-  storage = getStorage(app);         // Storage  — profile photos
-  rtdb    = getDatabase(app);        // Realtime DB — live announcements
+  rtdb    = getDatabase(app);    // ← Realtime Database — FREE, no billing
+  storage = getStorage(app);     // ← Storage — profile photos
+  db      = null;                // Firestore not used (requires billing)
 }
 
-export { app, auth, db, storage, rtdb, isFirebaseConfigured };
+export { app, db, rtdb, storage, isFirebaseConfigured };

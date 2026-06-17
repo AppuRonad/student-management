@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Students collection ──────────────────────────────────────────────
+    match /students/{studentId} {
+      allow read, write: if true;
+    }
+
+    // ── Chat conversations ───────────────────────────────────────────────
+    // Path: chats/{conversationId}
+    // Where conversationId = "admin_STU001" etc.
+    match /chats/{conversationId} {
+      allow read, write: if true;
+
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if true;
+      }
+
+      // Meta subcollection (read receipts)
+      match /meta/{docId} {
+        allow read, write: if true;
+      }
+    }
+
+    // ── Diagnostic collection (used by FirebaseDiagnostic.jsx) ──────────
+    match /_sms_diag_/{docId} {
+      allow read, write: if true;
+    }
+
+    // ── Announcements ────────────────────────────────────────────────────
+    match /announcements/{docId} {
+      allow read, write: if true;
+    }
+
+    // ── Catch-all (remove in production, replace with auth rules) ────────
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiSend, FiMessageCircle, FiX, FiChevronDown,
   FiCheck, FiUser, FiShield, FiEdit2, FiTrash2,
-  FiSlash, FiMoreVertical,
+  FiSlash, FiMoreVertical, FiLock, FiActivity,
 } from 'react-icons/fi';
 import {
   fsListenMessages, fsSendMessage,
   fsEditMessage, fsDeleteMessage, fsUnsendMessage,
-} from '../firebase/firestoreService';
+  fsMarkRead,
+} from '../supabase/supabaseService';
+import FirebaseDiagnostic from './FirebaseDiagnostic';
 import './MessagingBox.css';
 
 /* ── helpers ──────────────────────────────────────────────────────────── */
@@ -78,6 +80,7 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
   const [isOpen,     setIsOpen]     = useState(false);
   const [unread,     setUnread]     = useState(0);
   const [showScroll, setShowScroll] = useState(false);
+  const [showDiag,   setShowDiag]   = useState(false);
   const [failedIds,  setFailedIds]  = useState(new Set());
   const [menuFor,    setMenuFor]    = useState(null);   // msg id with open menu
   const [editingId,  setEditingId]  = useState(null);   // msg id being edited
@@ -106,6 +109,10 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
   useEffect(() => {
     if (isOpen) {
       setUnread(0);
+      // Mark messages as read in Firestore
+      if (studentId) {
+        fsMarkRead(studentId, currentUserRole).catch(() => {});
+      }
       setTimeout(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
         inputRef.current?.focus();
@@ -248,6 +255,10 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
                 </span>
                 <span className="msg-hdr-status"><span className="status-dot" /> Online</span>
               </div>
+              <motion.button className="msg-icon-btn" onClick={() => setShowDiag(true)}
+                title="Firebase diagnostic" whileHover={{ scale: 1.12 }} whileTap={{ scale: 0.9 }}>
+                <FiActivity style={{ fontSize: 14 }} />
+              </motion.button>
               <motion.button className="msg-close-btn" onClick={() => setIsOpen(false)}
                 whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.9 }}>
                 <FiX />
@@ -437,9 +448,18 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
               </motion.button>
             </form>
 
-            <div className="msg-footer">🔒 End-to-end encrypted · SMS Pro</div>
+            <div className="msg-footer">
+              <FiLock style={{ fontSize: 10, marginRight: 4, color: '#39ff14' }} />
+              <span style={{ color: '#39ff14', fontWeight: 700 }}>AES-256-GCM</span>
+              {' '}encrypted · stored in Firebase · SMS Pro
+            </div>
           </motion.div>
         )}
+      </AnimatePresence>
+
+      {/* Firebase diagnostic modal */}
+      <AnimatePresence>
+        {showDiag && <FirebaseDiagnostic onClose={() => setShowDiag(false)} />}
       </AnimatePresence>
     </div>
   );
