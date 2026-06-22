@@ -14,18 +14,38 @@ import FirebaseDiagnostic from './FirebaseDiagnostic';
 import './MessagingBox.css';
 
 /* ── helpers ──────────────────────────────────────────────────────────── */
+const IST = 'Asia/Kolkata';
+
 function fmt(ts) {
   if (!ts?.toDate) return '';
-  return ts.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return ts.toDate().toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: IST,
+  });
 }
+
 function dateLabel(ts) {
   if (!ts?.toDate) return '';
   const d = ts.toDate();
-  const today = new Date(), yest = new Date();
-  yest.setDate(today.getDate() - 1);
-  if (d.toDateString() === today.toDateString()) return 'Today';
-  if (d.toDateString() === yest.toDateString())  return 'Yesterday';
-  return d.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
+  const opts = { timeZone: IST };
+
+  // Get today and yesterday in IST
+  const nowIST = new Date(new Date().toLocaleString('en-US', opts));
+  const todayStr = nowIST.toDateString();
+  const yestIST = new Date(nowIST); yestIST.setDate(nowIST.getDate() - 1);
+  const yestStr = yestIST.toDateString();
+
+  // Convert message date to IST for comparison
+  const dIST = new Date(d.toLocaleString('en-US', opts));
+  const dStr = dIST.toDateString();
+
+  if (dStr === todayStr) return 'Today';
+  if (dStr === yestStr) return 'Yesterday';
+  return d.toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric', timeZone: IST,
+  });
 }
 
 function buildItems(msgs) {
@@ -41,7 +61,7 @@ function buildItems(msgs) {
     out.push({
       type: 'message', ...msg,
       isFirst: !prev || prev.senderId !== msg.senderId,
-      isLast:  !next || next.senderId !== msg.senderId,
+      isLast: !next || next.senderId !== msg.senderId,
     });
   });
   return out;
@@ -75,22 +95,22 @@ function BubbleMenu({ onEdit, onUnsend, onDelete, onClose }) {
    MAIN COMPONENT
    ════════════════════════════════════════════════════════════════════════ */
 export default function MessagingBox({ studentId, currentUserRole, currentUserName }) {
-  const [messages,   setMessages]   = useState([]);
-  const [input,      setInput]      = useState('');
-  const [isOpen,     setIsOpen]     = useState(false);
-  const [unread,     setUnread]     = useState(0);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
   const [showScroll, setShowScroll] = useState(false);
-  const [showDiag,   setShowDiag]   = useState(false);
-  const [failedIds,  setFailedIds]  = useState(new Set());
-  const [menuFor,    setMenuFor]    = useState(null);   // msg id with open menu
-  const [editingId,  setEditingId]  = useState(null);   // msg id being edited
-  const [editText,   setEditText]   = useState('');
+  const [showDiag, setShowDiag] = useState(false);
+  const [failedIds, setFailedIds] = useState(new Set());
+  const [menuFor, setMenuFor] = useState(null);   // msg id with open menu
+  const [editingId, setEditingId] = useState(null);   // msg id being edited
+  const [editText, setEditText] = useState('');
 
-  const bottomRef  = useRef(null);
+  const bottomRef = useRef(null);
   const contentRef = useRef(null);
-  const inputRef   = useRef(null);
-  const editRef    = useRef(null);
-  const prevCount  = useRef(0);
+  const inputRef = useRef(null);
+  const editRef = useRef(null);
+  const prevCount = useRef(0);
 
   /* live listener */
   useEffect(() => {
@@ -111,7 +131,7 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
       setUnread(0);
       // Mark messages as read in Firestore
       if (studentId) {
-        fsMarkRead(studentId, currentUserRole).catch(() => {});
+        fsMarkRead(studentId, currentUserRole).catch(() => { });
       }
       setTimeout(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -155,7 +175,7 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
     inputRef.current?.focus();
 
     const senderId = currentUserRole === 'admin' ? 'admin' : studentId;
-    const tempId   = `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const tempId = `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     setMessages(prev => [...prev, {
       id: tempId, senderId, text,
@@ -295,11 +315,11 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
                 }
 
                 const isMe = item.senderId === mySenderId;
-                const isFailed  = failedIds.has(item.id);
+                const isFailed = failedIds.has(item.id);
                 const isPending = !!item.isOptimistic;
-                const isUnsent  = item.unsent;
-                const menuOpen  = menuFor === item.id;
-                const canAct    = isMe && !isPending && !isFailed;
+                const isUnsent = item.unsent;
+                const menuOpen = menuFor === item.id;
+                const canAct = isMe && !isPending && !isFailed;
 
                 return (
                   <motion.div key={item.id}
@@ -313,7 +333,7 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
                         <div className={`msg-avatar ${isMe ? 'av-me' : 'av-them'}`}>
                           {isMe
                             ? (currentUserRole === 'admin' ? <FiShield /> : <FiUser />)
-                            : (currentUserRole === 'admin' ? <FiUser />   : <FiShield />)
+                            : (currentUserRole === 'admin' ? <FiUser /> : <FiShield />)
                           }
                         </div>
                       )}
@@ -354,8 +374,8 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
                             'msg-bubble',
                             isMe ? 'bubble-me' : 'bubble-them',
                             isPending ? 'bubble-pending' : '',
-                            isFailed  ? 'bubble-failed'  : '',
-                            isUnsent  ? 'bubble-unsent'  : '',
+                            isFailed ? 'bubble-failed' : '',
+                            isUnsent ? 'bubble-unsent' : '',
                           ].join(' ')}>
 
                             {isUnsent ? (
@@ -366,10 +386,10 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
 
                             <div className="msg-meta">
                               <span className="msg-time">
-                                {isFailed  ? '⚠️ Failed'   :
-                                 isPending ? 'Sending…'   :
-                                 item.edited && !isUnsent ? `${fmt(item.timestamp)} · edited` :
-                                 fmt(item.timestamp)}
+                                {isFailed ? '⚠️ Failed' :
+                                  isPending ? 'Sending…' :
+                                    item.edited && !isUnsent ? `${fmt(item.timestamp)} · edited` :
+                                      fmt(item.timestamp)}
                               </span>
                               {isMe && !isPending && !isFailed && !isUnsent && (
                                 <span className="msg-ticks"><FiCheck /><FiCheck /></span>
@@ -451,7 +471,7 @@ export default function MessagingBox({ studentId, currentUserRole, currentUserNa
             <div className="msg-footer">
               <FiLock style={{ fontSize: 10, marginRight: 4, color: '#39ff14' }} />
               <span style={{ color: '#39ff14', fontWeight: 700 }}>AES-256-GCM</span>
-              {' '}encrypted · stored in Firebase · SMS Pro
+              {' '}encrypted · Supabase · IST
             </div>
           </motion.div>
         )}
