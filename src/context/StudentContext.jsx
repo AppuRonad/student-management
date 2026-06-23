@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 const StudentContext = createContext();
 
 // ── API Base URL ────────────────────────────────────────────────────────────
-const API = 'http://localhost:8080/api/students';
+const API = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/students`;
 
 // ── Sample data (used only if backend is offline) ───────────────────────────
 const SAMPLE_STUDENTS = [
