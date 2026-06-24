@@ -130,6 +130,14 @@ export default function Navbar() {
                 <span>{label}</span>
               </NavLink>
             ))}
+            <NavLink to="/student-register" className={({ isActive }) => `mobile-link ${isActive ? 'active' : ''}`}>
+              <FiEdit />
+              <span>Register</span>
+            </NavLink>
+            <NavLink to="/student-login" className={({ isActive }) => `mobile-link ${isActive ? 'active' : ''}`}>
+              <FiLogIn />
+              <span>Student Login</span>
+            </NavLink>
             <button className="mobile-theme-toggle" onClick={toggleTheme}>
               {theme === 'dark' ? <FiSun /> : <FiMoon />}
               <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>

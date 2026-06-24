@@ -293,9 +293,17 @@
 }
 
 @media (max-width: 768px) {
-  .navbar { padding: 14px 20px; }
-  .navbar.scrolled { padding: 10px 20px; }
+  .navbar { padding: 14px 16px; }
+  .navbar.scrolled { padding: 10px 16px; }
   .navbar-links { display: none; }
+  .db-status { display: none; }
+  .student-register-btn { display: none; }
+  .student-portal-btn { display: none; }
   .mobile-toggle { display: flex; }
   .mobile-menu { display: flex; }
+}
+
+@media (max-width: 400px) {
+  .logo-sub { display: none; }
+  .theme-toggle { padding: 6px 8px; }
 }

@@ -246,8 +246,9 @@
 .chatbot-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
 @media (max-width: 480px) {
-  .chatbot-window { right: 12px; left: 12px; width: auto; bottom: 90px; }
-  .chatbot-fab { right: 16px; bottom: 20px; }
+  .chatbot-window { right: 12px; left: 12px; width: auto; bottom: 80px; max-height: calc(100dvh - 120px); }
+  .chatbot-fab { right: 14px; bottom: 16px; padding: 12px 16px; font-size: 18px; }
+  .fab-label { font-size: 13px; }
 }
 
 /* ═ KB ready dot on FAB ───────────────────────────────────────── */

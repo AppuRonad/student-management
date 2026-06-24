@@ -415,3 +415,17 @@
   .stats-section { grid-template-columns: 1fr 1fr; }
   .dept-bar-row { grid-template-columns: 100px 1fr 28px; }
 }
+
+@media (max-width: 480px) {
+  .hero { padding: 36px 16px 24px; }
+  .hero-desc { font-size: 15px; }
+  .stats-section { padding: 0 16px 28px; gap: 12px; }
+  .content-grid { padding: 0 16px 28px; }
+  .announcements-section { padding: 0 16px 28px; }
+  .cta-banner { margin: 0 16px 40px; padding: 24px 18px; }
+  .cta-content h2 { font-size: 22px; }
+  .stat-card { padding: 20px 14px; }
+  .stat-value { font-size: 28px; }
+  .dept-bar-row { grid-template-columns: 80px 1fr 24px; }
+  .dept-name { font-size: 12px; }
+}
