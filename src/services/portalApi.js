@@ -133,3 +133,63 @@ export async function deleteCompetition(id) {
 export async function getAllTrackRecords() {
   return apiFetch(`${BASE}/track-records`);
 }
+
+// ── Admin Auth API ──────────────────────────────────────────────────────────
+
+export async function registerAdmin(fullName, email, password) {
+  return apiFetch(`${BASE}/admin/register`, {
+    method: 'POST',
+    body: JSON.stringify({ fullName, email, password }),
+  });
+}
+
+export async function loginAdmin(email, password) {
+  return apiFetch(`${BASE}/admin/login`, {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function checkAdminExists() {
+  const res = await apiFetch(`${BASE}/admin/exists`);
+  return res?.exists ?? false;
+}
+
+// ── Member API ──────────────────────────────────────────────────────────────
+
+export async function registerMember(data) {
+  return apiFetch(`${BASE}/member/register`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function loginMember(email, password) {
+  return apiFetch(`${BASE}/member/login`, {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export async function getAllMembers() {
+  return apiFetch(`${BASE}/member`);
+}
+
+export async function approveMember(memberId, adminId) {
+  return apiFetch(`${BASE}/member/${memberId}/approve`, {
+    method: 'PUT',
+    body: JSON.stringify({ adminId }),
+  });
+}
+
+export async function rejectMember(memberId) {
+  return apiFetch(`${BASE}/member/${memberId}/reject`, { method: 'PUT' });
+}
+
+export async function deleteMemberApi(memberId) {
+  return apiFetch(`${BASE}/member/${memberId}`, { method: 'DELETE' });
+}
+
+export async function getStudentsByDepartment(department) {
+  return apiFetch(`${BASE}/students/by-department/${encodeURIComponent(department)}`);
+}

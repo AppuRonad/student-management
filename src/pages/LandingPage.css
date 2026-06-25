@@ -1,0 +1,174 @@
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  padding: 20px;
+}
+
+.landing-center {
+  text-align: center;
+  max-width: 860px;
+  width: 100%;
+}
+
+/* Logo */
+.landing-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.landing-logo-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: white;
+  box-shadow: 0 0 30px rgba(180,79,255,0.4);
+}
+
+.landing-logo-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+}
+
+.landing-logo-text span {
+  color: var(--neon-cyan);
+}
+
+/* Tagline */
+.landing-tagline {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-bottom: 48px;
+  letter-spacing: 0.3px;
+}
+
+/* Panel cards */
+.landing-panels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  .landing-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 32px 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+  backdrop-filter: blur(16px);
+}
+
+.panel-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 20px;
+}
+
+.panel-card:hover::before { opacity: 1; }
+
+.panel-admin::before  { background: linear-gradient(135deg, rgba(180,79,255,0.08), rgba(0,245,255,0.04)); }
+.panel-student::before { background: linear-gradient(135deg, rgba(0,245,255,0.08), rgba(57,255,20,0.04)); }
+.panel-member::before  { background: linear-gradient(135deg, rgba(255,230,0,0.08), rgba(255,107,53,0.04)); }
+
+.panel-admin:hover  { box-shadow: 0 20px 60px rgba(180,79,255,0.25), 0 0 0 1px rgba(180,79,255,0.3); }
+.panel-student:hover { box-shadow: 0 20px 60px rgba(0,245,255,0.2),  0 0 0 1px rgba(0,245,255,0.25); }
+.panel-member:hover  { box-shadow: 0 20px 60px rgba(255,230,0,0.2),  0 0 0 1px rgba(255,230,0,0.25); }
+
+.panel-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  position: relative;
+  z-index: 1;
+}
+
+.panel-admin .panel-icon  { background: linear-gradient(135deg, #b44fff, #00f5ff); color: white; box-shadow: 0 0 24px rgba(180,79,255,0.4); }
+.panel-student .panel-icon { background: linear-gradient(135deg, #00f5ff, #39ff14); color: #000; box-shadow: 0 0 24px rgba(0,245,255,0.4); }
+.panel-member .panel-icon  { background: linear-gradient(135deg, #ffe600, #ff6b35); color: #000; box-shadow: 0 0 24px rgba(255,230,0,0.4); }
+
+.panel-content {
+  position: relative;
+  z-index: 1;
+}
+
+.panel-content h2 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  letter-spacing: 0.5px;
+}
+
+.panel-content p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.panel-arrow {
+  font-size: 22px;
+  position: relative;
+  z-index: 1;
+  opacity: 0.5;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.panel-card:hover .panel-arrow {
+  opacity: 1;
+  transform: translateX(4px);
+}
+
+.panel-admin  .panel-arrow { color: var(--neon-purple); }
+.panel-student .panel-arrow { color: var(--neon-cyan); }
+.panel-member  .panel-arrow { color: #ffe600; }
+
+/* Footer */
+.landing-footer {
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+[data-theme="light"] .panel-card {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}

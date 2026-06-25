@@ -1,0 +1,164 @@
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.admin-login-card {
+  background: var(--glass-bg);
+  border: 1px solid rgba(180,79,255,0.25);
+  border-radius: 24px;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 0 40px rgba(180,79,255,0.08);
+  position: relative;
+}
+
+[data-theme="light"] .admin-login-card {
+  background: rgba(255,255,255,0.95);
+  border-color: rgba(139,45,255,0.2);
+  box-shadow: 0 16px 60px rgba(0,0,0,0.1);
+}
+
+.alc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.alc-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0.5px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.alc-back:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+
+.alc-theme {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 0.5px solid rgba(180,79,255,0.2);
+  background: rgba(180,79,255,0.08);
+  color: var(--text-secondary);
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+
+.alc-icon {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b44fff, #00f5ff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  color: white;
+  margin: 0 auto 16px;
+  box-shadow: 0 0 30px rgba(180,79,255,0.4);
+}
+
+.alc-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  margin: 0 0 6px;
+}
+
+.alc-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin: 0 0 28px;
+}
+
+.alc-form { display: flex; flex-direction: column; gap: 14px; }
+
+.alc-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.alc-field:focus-within {
+  border-color: rgba(180,79,255,0.5);
+  box-shadow: 0 0 0 3px rgba(180,79,255,0.1);
+}
+[data-theme="light"] .alc-field { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .alc-field:focus-within { border-color: rgba(139,45,255,0.4); }
+
+.alc-field-icon { color: var(--neon-purple); font-size: 16px; flex-shrink: 0; }
+
+.alc-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+}
+.alc-input::placeholder { color: var(--text-muted); }
+
+.alc-eye {
+  background: none; border: none; color: var(--text-secondary);
+  font-size: 16px; cursor: pointer; padding: 0; display: flex;
+}
+
+.alc-error {
+  background: rgba(255,45,120,0.1);
+  border: 1px solid rgba(255,45,120,0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #ff6b8a;
+}
+
+.alc-submit {
+  padding: 13px;
+  background: linear-gradient(135deg, #b44fff, #00f5ff);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: opacity 0.2s;
+}
+.alc-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.alc-register-link {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 20px;
+}
+.alc-register-link a {
+  color: var(--neon-purple);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 4px;
+}
