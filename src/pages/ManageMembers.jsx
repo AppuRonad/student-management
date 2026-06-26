@@ -60,9 +60,24 @@ const STATUS_COLORS = {
 
 // ── Permission Panel ──────────────────────────────────────────────────────────
 function PermissionPanel({ member, onSaved }) {
-  const [perms,   setPerms]   = useState({ ...member.permissions });
+  const ALL_KEYS = PERMISSION_GROUPS.flatMap(g => g.perms.map(p => p.key));
+
+  // Build defaults — any key not in member.permissions defaults to false
+  const buildPerms = (source) => {
+    const base = {};
+    ALL_KEYS.forEach(k => { base[k] = false; });
+    return { ...base, ...(source || {}) };
+  };
+
+  const [perms,   setPerms]   = useState(() => buildPerms(member.permissions));
   const [saving,  setSaving]  = useState(false);
   const [changed, setChanged] = useState(false);
+
+  // Sync when parent reloads member data (e.g. after save)
+  useEffect(() => {
+    setPerms(buildPerms(member.permissions));
+    setChanged(false);
+  }, [member.id, JSON.stringify(member.permissions)]);
 
   const toggle = (key) => {
     setPerms(p => { const n = { ...p, [key]: !p[key] }; setChanged(true); return n; });
