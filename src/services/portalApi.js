@@ -190,6 +190,13 @@ export async function deleteMemberApi(memberId) {
   return apiFetch(`${BASE}/member/${memberId}`, { method: 'DELETE' });
 }
 
+export async function updateMemberPermissions(memberId, permissions) {
+  return apiFetch(`${BASE}/member/${memberId}/permissions`, {
+    method: 'PUT',
+    body: JSON.stringify(permissions),
+  });
+}
+
 export async function getStudentsByDepartment(department) {
   return apiFetch(`${BASE}/students/by-department/${encodeURIComponent(department)}`);
 }

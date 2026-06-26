@@ -20,9 +20,12 @@ export default function MemberDashboard() {
   const [loading,  setLoading]  = useState(true);
   const [search,   setSearch]   = useState('');
 
+  const perms = member?.permissions || {};
+
   // Redirect if not logged in
   useEffect(() => {
     if (!member) { navigate('/member-login'); return; }
+    if (!perms.viewStudents) return; // will show blocked state
     loadStudents();
   }, [member]);
 
@@ -105,6 +108,13 @@ export default function MemberDashboard() {
           </motion.div>
         </div>
 
+        {/* Permission warning if viewStudents is off */}
+        {!perms.viewStudents && (
+          <div style={{ background: 'rgba(255,230,0,0.08)', border: '1px solid rgba(255,230,0,0.2)', borderRadius: 14, padding: '20px 24px', marginBottom: 20, color: '#ffe600', fontSize: 14, textAlign: 'center' }}>
+            ⚠️ You don't have permission to view students. Contact your admin to enable access.
+          </div>
+        )}
+
         {/* Students table */}
         <div className="member-section">
           <div className="ms-header">
@@ -113,21 +123,23 @@ export default function MemberDashboard() {
               <p className="ms-sub">{member?.department} — {students.length} student{students.length !== 1 ? 's' : ''}</p>
             </div>
             <div className="ms-actions">
-              <div className="ms-search">
-                <FiSearch />
-                <input
-                  placeholder="Search students…"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
-              </div>
-              <motion.button
-                className="ms-add-btn"
-                onClick={() => navigate('/add')}
-                whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-              >
-                <FiPlus /> Add Student
-              </motion.button>
+            <div className="ms-search">
+            <FiSearch />
+            <input
+            placeholder="Search students…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            />
+            </div>
+            {perms.addStudents && (
+            <motion.button
+            className="ms-add-btn"
+            onClick={() => navigate('/add')}
+              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+            >
+              <FiPlus /> Add Student
+                </motion.button>
+              )}
             </div>
           </div>
 
@@ -176,12 +188,19 @@ export default function MemberDashboard() {
                       </td>
                       <td>
                         <div className="ms-row-actions">
-                          <button className="ms-act-btn view" onClick={() => navigate(`/student/${s.id}`)}>
-                            <FiUser />
-                          </button>
-                          <button className="ms-act-btn edit" onClick={() => navigate(`/edit/${s.id}`)}>
-                            <FiEdit2 />
-                          </button>
+                          {perms.viewStudents && (
+                            <button className="ms-act-btn view" onClick={() => navigate(`/student/${s.id}`)}>
+                              <FiUser />
+                            </button>
+                          )}
+                          {perms.editStudents && (
+                            <button className="ms-act-btn edit" onClick={() => navigate(`/edit/${s.id}`)}>
+                              <FiEdit2 />
+                            </button>
+                          )}
+                          {!perms.viewStudents && !perms.editStudents && (
+                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>No access</span>
+                          )}
                         </div>
                       </td>
                     </motion.tr>
