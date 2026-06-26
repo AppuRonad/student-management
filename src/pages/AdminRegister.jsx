@@ -33,7 +33,7 @@ export default function AdminRegister() {
       const res = await registerAdmin(form.fullName, form.email, form.password);
       if (res?.success) {
         setAdminSession(res.admin);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         setError(res?.message || 'Registration failed');
       }

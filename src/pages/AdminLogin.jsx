@@ -26,7 +26,7 @@ export default function AdminLogin() {
       const res = await loginAdmin(email, password);
       if (res?.success) {
         setAdminSession(res.admin);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         setError(res?.message || 'Login failed');
       }

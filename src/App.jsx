@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { StudentProvider } from './context/StudentContext';
 import { PortalAuthProvider } from './context/PortalAuthContext';
-import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext';
-import { MemberAuthProvider, useMemberAuth } from './context/MemberAuthContext';
+import { AdminAuthProvider } from './context/AdminAuthContext';
+import { MemberAuthProvider } from './context/MemberAuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import ParticleBackground from './components/ParticleBackground';
@@ -28,8 +28,6 @@ import MemberRegister  from './pages/MemberRegister';
 import MemberDashboard from './pages/MemberDashboard';
 import ManageMembers   from './pages/ManageMembers';
 
-// ── Layout wrappers ───────────────────────────────────────────────────────────
-
 function AdminLayout({ children }) {
   return (
     <>
@@ -40,19 +38,6 @@ function AdminLayout({ children }) {
   );
 }
 
-// ── Protected route — admin must be logged in ────────────────────────────────
-function AdminRoute({ children }) {
-  const { isAdminLoggedIn } = useAdminAuth();
-  return isAdminLoggedIn ? children : <Navigate to="/admin-login" replace />;
-}
-
-// ── Protected route — member must be logged in ───────────────────────────────
-function MemberRoute({ children }) {
-  const { isMemberLoggedIn } = useMemberAuth();
-  return isMemberLoggedIn ? children : <Navigate to="/member-login" replace />;
-}
-
-// ── Main app with routes ─────────────────────────────────────────────────────
 function AppInner() {
   const { theme } = useTheme();
 
@@ -66,35 +51,22 @@ function AppInner() {
                 <BackgroundEffects />
                 <Routes>
 
-                  {/* ── Landing page ───────────────────────────────────────── */}
+                  {/* ── Root → Landing (login gateway) ─────────────────────── */}
+                  <Route path="/"     element={<><ParticleBackground /><LandingPage /></>} />
                   <Route path="/home" element={<><ParticleBackground /><LandingPage /></>} />
 
                   {/* ── Admin auth ─────────────────────────────────────────── */}
                   <Route path="/admin-login"    element={<><ParticleBackground /><AdminLogin /></>} />
                   <Route path="/admin-register" element={<><ParticleBackground /><AdminRegister /></>} />
 
-                  {/* ── Admin panel (protected) ────────────────────────────── */}
-                  <Route path="/" element={
-                    <AdminLayout><Dashboard /></AdminLayout>
-                  } />
-                  <Route path="/students" element={
-                    <AdminLayout><Students /></AdminLayout>
-                  } />
-                  <Route path="/add" element={
-                    <AdminLayout><StudentForm /></AdminLayout>
-                  } />
-                  <Route path="/edit/:id" element={
-                    <AdminLayout><StudentForm /></AdminLayout>
-                  } />
-                  <Route path="/student/:id" element={
-                    <AdminLayout><StudentProfile /></AdminLayout>
-                  } />
-                  <Route path="/analytics" element={
-                    <AdminLayout><Analytics /></AdminLayout>
-                  } />
-                  <Route path="/admin/members" element={
-                    <AdminLayout><ManageMembers /></AdminLayout>
-                  } />
+                  {/* ── Admin panel ────────────────────────────────────────── */}
+                  <Route path="/dashboard"    element={<AdminLayout><Dashboard /></AdminLayout>} />
+                  <Route path="/students"     element={<AdminLayout><Students /></AdminLayout>} />
+                  <Route path="/add"          element={<AdminLayout><StudentForm /></AdminLayout>} />
+                  <Route path="/edit/:id"     element={<AdminLayout><StudentForm /></AdminLayout>} />
+                  <Route path="/student/:id"  element={<AdminLayout><StudentProfile /></AdminLayout>} />
+                  <Route path="/analytics"    element={<AdminLayout><Analytics /></AdminLayout>} />
+                  <Route path="/admin/members" element={<AdminLayout><ManageMembers /></AdminLayout>} />
 
                   {/* ── Student portal ─────────────────────────────────────── */}
                   <Route path="/student-login"    element={<><ParticleBackground /><StudentLogin /></>} />
@@ -107,7 +79,7 @@ function AppInner() {
                   <Route path="/member"          element={<><ParticleBackground /><MemberDashboard /></>} />
 
                   {/* ── Fallback ───────────────────────────────────────────── */}
-                  <Route path="*" element={<Navigate to="/home" replace />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
 
                 </Routes>
 

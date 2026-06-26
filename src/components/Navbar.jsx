@@ -8,11 +8,11 @@ import { useAdminAuth } from '../context/AdminAuthContext';
 import './Navbar.css';
 
 const links = [
-  { to: '/',             label: 'Dashboard',   icon: FiHome },
-  { to: '/students',    label: 'Students',    icon: FiUsers },
-  { to: '/add',          label: 'Add Student', icon: FiUserPlus },
-  { to: '/analytics',   label: 'Analytics',   icon: FiBarChart2 },
-  { to: '/admin/members', label: 'Members',   icon: FiShield },
+  { to: '/dashboard',      label: 'Dashboard',   icon: FiHome },
+  { to: '/students',       label: 'Students',    icon: FiUsers },
+  { to: '/add',            label: 'Add Student', icon: FiUserPlus },
+  { to: '/analytics',      label: 'Analytics',   icon: FiBarChart2 },
+  { to: '/admin/members',  label: 'Members',     icon: FiShield },
 ];
 
 export default function Navbar() {
@@ -34,7 +34,7 @@ export default function Navbar() {
 
   const handleAdminLogout = () => {
     logoutAdmin();
-    navigate('/home');
+    navigate('/');
   };
 
   return (
@@ -44,7 +44,7 @@ export default function Navbar() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
-      <NavLink to="/" className="navbar-logo">
+      <NavLink to="/dashboard" className="navbar-logo">
         <motion.div
           className="logo-icon"
           animate={{ rotate: [0, 360] }}
