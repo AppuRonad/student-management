@@ -1,24 +1,28 @@
 import { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiHome, FiUsers, FiUserPlus, FiBarChart2, FiMenu, FiX, FiZap, FiLogIn, FiDatabase, FiEdit, FiSun, FiMoon } from 'react-icons/fi';
+import { FiHome, FiUsers, FiUserPlus, FiBarChart2, FiMenu, FiX, FiZap, FiLogIn, FiDatabase, FiEdit, FiSun, FiMoon, FiShield, FiLogOut } from 'react-icons/fi';
 import { useStudents } from '../context/StudentContext';
 import { useTheme } from '../context/ThemeContext';
+import { useAdminAuth } from '../context/AdminAuthContext';
 import './Navbar.css';
 
 const links = [
-  { to: '/',          label: 'Dashboard',   icon: FiHome },
-  { to: '/students',  label: 'Students',    icon: FiUsers },
-  { to: '/add',       label: 'Add Student', icon: FiUserPlus },
-  { to: '/analytics', label: 'Analytics',   icon: FiBarChart2 },
+  { to: '/',             label: 'Dashboard',   icon: FiHome },
+  { to: '/students',    label: 'Students',    icon: FiUsers },
+  { to: '/add',          label: 'Add Student', icon: FiUserPlus },
+  { to: '/analytics',   label: 'Analytics',   icon: FiBarChart2 },
+  { to: '/admin/members', label: 'Members',   icon: FiShield },
 ];
 
 export default function Navbar() {
   const [scrolled,    setScrolled]    = useState(false);
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const location   = useLocation();
+  const navigate   = useNavigate();
   const { backendUp, loading } = useStudents();
   const { theme, toggleTheme } = useTheme();
+  const { admin, logoutAdmin, isAdminLoggedIn } = useAdminAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -27,6 +31,11 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => setMobileOpen(false), [location]);
+
+  const handleAdminLogout = () => {
+    logoutAdmin();
+    navigate('/home');
+  };
 
   return (
     <motion.nav
@@ -110,6 +119,21 @@ export default function Navbar() {
       <NavLink to="/student-login" className="student-portal-btn">
         <FiLogIn /> Student Login
       </NavLink>
+
+      {/* Admin badge / login button */}
+      {isAdminLoggedIn ? (
+        <div className="navbar-admin-badge">
+          <FiShield />
+          <span>{admin?.fullName?.split(' ')[0]}</span>
+          <button className="navbar-admin-logout" onClick={handleAdminLogout} title="Logout admin">
+            <FiLogOut />
+          </button>
+        </div>
+      ) : (
+        <NavLink to="/admin-login" className="navbar-admin-btn">
+          <FiShield /> Admin
+        </NavLink>
+      )}
 
       <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)}>
         {mobileOpen ? <FiX /> : <FiMenu />}
