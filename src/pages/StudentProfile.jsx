@@ -9,6 +9,7 @@ import AvatarBadge from '../components/AvatarBadge';
 import StudentIDCard from '../components/StudentIDCard';
 import PhotoUpload from '../components/PhotoUpload';
 import MessagingBox from '../components/MessagingBox';
+import AttendanceModal from '../components/AttendanceModal';
 import { getTrackRecord, saveAdminMarks } from '../services/portalApi';
 import './StudentProfile.css';
 
@@ -25,8 +26,14 @@ export default function StudentProfile() {
   const [semMarks, setSemMarks] = useState([]);
   const [savingMarks, setSavingMarks] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showAttendance, setShowAttendance] = useState(false);
 
   const student = getStudent(id);
+
+  const refreshTrackRecord = () => {
+    if (!student) return;
+    getTrackRecord(student.id).then(data => setTrackRecords(data || {}));
+  };
 
   useEffect(() => {
     if (student) {
@@ -159,6 +166,14 @@ export default function StudentProfile() {
               </span>
               <span className="pstat-label">GPA · {gpaLabel}</span>
             </div>
+            {trackRecords?.attendance?.total > 0 && (
+              <div className="profile-stat">
+                <span className="pstat-value" style={{ color: trackRecords.attendance.percent >= 75 ? '#39ff14' : trackRecords.attendance.percent >= 65 ? '#ffe600' : '#ff2d78' }}>
+                  {trackRecords.attendance.percent}%
+                </span>
+                <span className="pstat-label">Attendance</span>
+              </div>
+            )}
             {age && (
               <div className="profile-stat">
                 <span className="pstat-value">{age}</span>
@@ -177,6 +192,9 @@ export default function StudentProfile() {
             <Link to={`/edit/${student.id}`} className="gradient-btn">
               <FiEdit2 style={{ marginRight: 8 }} /> Edit Profile
             </Link>
+            <button className="gradient-btn" style={{ background: 'linear-gradient(135deg, #00f5ff, #39ff14)', color: '#000' }} onClick={() => setShowAttendance(true)}>
+              <FiCalendar style={{ marginRight: 8 }} /> Add Attendance
+            </button>
             <StudentIDCard student={student} />
             <button className="gradient-btn danger" onClick={() => setShowDelete(true)}>
               <FiTrash2 style={{ marginRight: 8 }} /> Delete
@@ -436,6 +454,17 @@ export default function StudentProfile() {
 
       {/* Admin Messaging Box */}
       {student && <MessagingBox studentId={student.id} currentUserRole="admin" currentUserName="Administrator" />}
+
+      {/* Attendance Modal */}
+      <AnimatePresence>
+        {showAttendance && (
+          <AttendanceModal
+            student={{ id: student.id, fullName: student.fullName }}
+            onClose={() => setShowAttendance(false)}
+            onSaved={refreshTrackRecord}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Delete modal */}
       <AnimatePresence>
