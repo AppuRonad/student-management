@@ -27,6 +27,7 @@ import MemberLogin     from './pages/MemberLogin';
 import MemberRegister  from './pages/MemberRegister';
 import MemberDashboard from './pages/MemberDashboard';
 import ManageMembers   from './pages/ManageMembers';
+import ViewMembers     from './pages/ViewMembers';
 
 function AdminLayout({ children }) {
   return (
@@ -77,6 +78,7 @@ function AppInner() {
                   <Route path="/member-login"    element={<><ParticleBackground /><MemberLogin /></>} />
                   <Route path="/member-register" element={<><ParticleBackground /><MemberRegister /></>} />
                   <Route path="/member"          element={<><ParticleBackground /><MemberDashboard /></>} />
+                  <Route path="/member/view-members" element={<><ParticleBackground /><ViewMembers /></>} />
 
                   {/* ── Fallback ───────────────────────────────────────────── */}
                   <Route path="*" element={<Navigate to="/" replace />} />

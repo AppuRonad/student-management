@@ -321,6 +321,8 @@
 .action-btn.view:hover { background: rgba(0,245,255,0.1); border-color: rgba(0,245,255,0.3); }
 .action-btn.edit { color: var(--neon-purple); }
 .action-btn.edit:hover { background: rgba(180,79,255,0.1); border-color: rgba(180,79,255,0.3); }
+.action-btn.attendance { color: #39ff14; }
+.action-btn.attendance:hover { background: rgba(57,255,20,0.1); border-color: rgba(57,255,20,0.3); }
 .action-btn.delete { color: var(--neon-pink); }
 .action-btn.delete:hover { background: rgba(255,45,120,0.1); border-color: rgba(255,45,120,0.3); }
 

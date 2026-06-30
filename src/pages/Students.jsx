@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiEye, FiUserPlus, FiX, FiChevronDown } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiEye, FiUserPlus, FiX, FiChevronDown, FiCalendar } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useStudents, COURSES, DEPARTMENTS } from '../context/StudentContext';
 import AvatarBadge from '../components/AvatarBadge';
+import AttendanceModal from '../components/AttendanceModal';
 import './Students.css';
 
 export default function Students() {
@@ -15,6 +16,7 @@ export default function Students() {
   const [filterDept, setFilterDept] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [attendanceStudent, setAttendanceStudent] = useState(null); // { id, fullName } or null
   const [viewMode, setViewMode] = useState('grid'); // grid | table
 
   const filtered = useMemo(() => {
@@ -197,6 +199,13 @@ export default function Students() {
                         <FiEdit2 />
                       </button>
                       <button
+                        className="action-btn attendance"
+                        onClick={() => setAttendanceStudent({ id: s.id, fullName: s.fullName })}
+                        title="Add attendance"
+                      >
+                        <FiCalendar />
+                      </button>
+                      <button
                         className="action-btn delete"
                         onClick={() => setDeleteConfirm(s.id)}
                         title="Delete"
@@ -267,6 +276,7 @@ export default function Students() {
                         <div className="table-actions">
                           <button className="action-btn view" onClick={() => navigate(`/student/${s.id}`)}><FiEye /></button>
                           <button className="action-btn edit" onClick={() => navigate(`/edit/${s.id}`)}><FiEdit2 /></button>
+                          <button className="action-btn attendance" onClick={() => setAttendanceStudent({ id: s.id, fullName: s.fullName })} title="Add attendance"><FiCalendar /></button>
                           <button className="action-btn delete" onClick={() => setDeleteConfirm(s.id)}><FiTrash2 /></button>
                         </div>
                       </td>
@@ -278,6 +288,17 @@ export default function Students() {
           </motion.div>
         )}
       </div>
+
+      {/* Attendance Modal */}
+      <AnimatePresence>
+        {attendanceStudent && (
+          <AttendanceModal
+            student={attendanceStudent}
+            onClose={() => setAttendanceStudent(null)}
+            onSaved={() => {}}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Delete Confirm Modal */}
       <AnimatePresence>

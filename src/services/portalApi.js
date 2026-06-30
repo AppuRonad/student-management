@@ -108,6 +108,15 @@ export async function saveAdminMarks(studentId, adminMarks) {
   });
 }
 
+// ── Attendance API — used by Admin (all students) and Member (dept students, gated by addAttendance perm) ──
+
+export async function saveAttendance(studentId, attendance) {
+  return apiFetch(`${BASE}/track-records/${studentId}/attendance`, {
+    method: 'PUT',
+    body: JSON.stringify(attendance),
+  });
+}
+
 // ── Competitions API ──────────────────────────────────────────────────────────
 
 export async function getCompetitions(studentId, category = '') {

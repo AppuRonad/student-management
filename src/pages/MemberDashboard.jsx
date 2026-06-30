@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   FiUsers, FiLogOut, FiSearch, FiPlus, FiEdit2,
-  FiTrash2, FiBarChart2, FiUser, FiSun, FiMoon,
+  FiTrash2, FiBarChart2, FiUser, FiSun, FiMoon, FiCalendar, FiEye,
 } from 'react-icons/fi';
 import { useMemberAuth } from '../context/MemberAuthContext';
 import { getStudentsByDepartment } from '../services/portalApi';
 import { useTheme } from '../context/ThemeContext';
 import { toast } from 'react-toastify';
+import AttendanceModal from '../components/AttendanceModal';
+import { AnimatePresence } from 'framer-motion';
 import './MemberDashboard.css';
 
 export default function MemberDashboard() {
@@ -19,6 +21,7 @@ export default function MemberDashboard() {
   const [students, setStudents] = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [search,   setSearch]   = useState('');
+  const [attendanceStudent, setAttendanceStudent] = useState(null); // { id, fullName } or null
 
   const perms = member?.permissions || {};
 
@@ -72,6 +75,14 @@ export default function MemberDashboard() {
         <div className="member-topbar-actions">
           <motion.button className="mb-icon-btn" onClick={toggleTheme} whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.9 }}>
             {theme === 'dark' ? <FiSun /> : <FiMoon />}
+          </motion.button>
+          <motion.button
+            className="member-view-members-btn"
+            onClick={() => navigate('/member/view-members')}
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+            title="View other members (read-only)"
+          >
+            <FiEye /> View Members
           </motion.button>
           <div className="member-profile">
             <div className="member-avatar">{member?.fullName?.[0]?.toUpperCase()}</div>
@@ -198,7 +209,16 @@ export default function MemberDashboard() {
                               <FiEdit2 />
                             </button>
                           )}
-                          {!perms.viewStudents && !perms.editStudents && (
+                          {perms.addAttendance && (
+                            <button
+                              className="ms-act-btn attendance"
+                              onClick={() => setAttendanceStudent({ id: s.id, fullName: s.fullName })}
+                              title="Add attendance"
+                            >
+                              <FiCalendar />
+                            </button>
+                          )}
+                          {!perms.viewStudents && !perms.editStudents && !perms.addAttendance && (
                             <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>No access</span>
                           )}
                         </div>
@@ -210,7 +230,19 @@ export default function MemberDashboard() {
             </div>
           )}
         </div>
+
       </div>
+
+      {/* Attendance Modal */}
+      <AnimatePresence>
+        {attendanceStudent && (
+          <AttendanceModal
+            student={attendanceStudent}
+            onClose={() => setAttendanceStudent(null)}
+            onSaved={loadStudents}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

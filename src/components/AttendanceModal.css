@@ -1,0 +1,160 @@
+.att-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.att-box {
+  background: rgba(10,10,30,0.97);
+  border: 1px solid rgba(0,245,255,0.25);
+  border-radius: 22px;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 40px rgba(0,245,255,0.08);
+}
+[data-theme="light"] .att-box {
+  background: rgba(255,255,255,0.97);
+  border-color: rgba(0,180,200,0.25);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.12);
+}
+
+/* Header */
+.att-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.att-header-icon {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #00f5ff, #39ff14);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; color: #000;
+  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(0,245,255,0.35);
+}
+.att-header-info { flex: 1; min-width: 0; }
+.att-title { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.att-sub { font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.att-close {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: none; color: var(--text-secondary);
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.att-close:hover { background: rgba(255,45,120,0.15); color: #ff2d78; }
+
+.att-loading { text-align: center; padding: 30px 0; color: var(--text-secondary); font-size: 13px; }
+
+/* Fields */
+.att-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.att-field { display: flex; flex-direction: column; gap: 6px; }
+.att-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+.att-field input {
+  padding: 11px 14px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.att-field input:focus { border-color: rgba(0,245,255,0.45); }
+[data-theme="light"] .att-field input { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+
+/* Live preview */
+.att-preview {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+[data-theme="light"] .att-preview { background: rgba(0,0,0,0.025); border-color: rgba(0,0,0,0.06); }
+
+.att-preview-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.att-percent { font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 900; }
+
+.att-bar-track {
+  height: 8px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+[data-theme="light"] .att-bar-track { background: rgba(0,0,0,0.08); }
+.att-bar-fill { height: 100%; border-radius: 50px; }
+
+.att-policy-note {
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.att-error {
+  background: rgba(255,45,120,0.1);
+  border: 1px solid rgba(255,45,120,0.25);
+  border-radius: 10px;
+  padding: 9px 13px;
+  font-size: 12px;
+  color: #ff6b8a;
+  margin-bottom: 14px;
+}
+
+/* Actions */
+.att-actions { display: flex; gap: 10px; }
+.att-cancel {
+  flex: 1;
+  padding: 11px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+.att-cancel:hover { background: rgba(255,255,255,0.1); }
+.att-save {
+  flex: 1.6;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 11px;
+  background: linear-gradient(135deg, #00f5ff, #39ff14);
+  border: none;
+  border-radius: 12px;
+  color: #000;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+.att-save:disabled { opacity: 0.5; cursor: not-allowed; }
